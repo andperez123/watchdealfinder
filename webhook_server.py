@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import os
+import hashlib
 from dotenv import load_dotenv
 from database import WatchDatabase
 from notifications import NotificationManager
@@ -7,7 +8,8 @@ from notifications import NotificationManager
 app = Flask(__name__)
 load_dotenv()
 
-VERIFICATION_TOKEN = "9cKxL4Rm8HtWaX3sZ7qDpJNU2FveyAgKTB6uYVpFMCGh"  # Use the token shown in your screenshot
+VERIFICATION_TOKEN = "9cKxL4Rm8HtWaX3sZ7qDpJNU2FveyAgKTB6uYVpFMCGh"
+ENDPOINT = "https://watchdealfinder.onrender.com/ebay-deletion"
 
 @app.route('/')
 def home():
@@ -18,9 +20,17 @@ def home():
 def verify_endpoint():
     """Handle eBay's endpoint verification"""
     challenge_code = request.args.get('challenge_code')
-    if challenge_code:
-        return jsonify({"challengeResponse": challenge_code})
-    return jsonify({"error": "No challenge code provided"}), 400
+    if not challenge_code:
+        return jsonify({"error": "No challenge code provided"}), 400
+    
+    # Create the hash as per eBay's specifications
+    # hash(challengeCode + verificationToken + endpoint)
+    message = f"{challenge_code}{VERIFICATION_TOKEN}{ENDPOINT}"
+    challenge_response = hashlib.sha256(message.encode('utf-8')).hexdigest()
+    
+    return jsonify({
+        "challengeResponse": challenge_response
+    })
 
 @app.route('/ebay-deletion', methods=['POST'])
 def handle_notification():
