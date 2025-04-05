@@ -2,4 +2,6 @@ ebaysdk==2.2.0
 python-dotenv==1.0.0
 pandas==2.1.4
 requests==2.31.0
-beautifulsoup4==4.12.2 
+beautifulsoup4==4.12.2
+flask==3.0.2
+pyOpenSSL==24.0.0 
